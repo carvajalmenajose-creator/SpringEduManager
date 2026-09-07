@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	th:replace="~{layout/base :: layout('Estudiantes', ~{::contenido}, ~{})}">
+<div th:fragment="contenido">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h1 class="fw-bold text-dark mb-1"><i class="fa-solid fa-graduation-cap me-2" ></i>Estudiantes</h1>
+			<p class="text-muted small mb-0">Alta y edición a cargo del administrador. El profesor solo consulta el listado.</p>
+		</div>
+		<button type="button" class="btn text-white px-4 py-2 shadow-sm rounded-pill fw-semibold" style="background-color: #FB2C36;" data-bs-toggle="modal"
+			data-bs-target="#modalEstudiante" onclick="nuevoEstudiante()"
+			sec:authorize="hasRole('ADMIN')">
+			<i class="fa-solid fa-plus me-2"></i> Nuevo Estudiante
+		</button>
+	</div>
+
+	<div th:if="${error}" class="alert alert-danger rounded-3" th:text="${error}"></div>
+	<div th:if="${exito}" class="alert alert-success rounded-3" th:text="${exito}"></div>
+
+	<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead style="background-color: #f8fafc; color: #475569; font-size: 0.85rem; letter-spacing: 0.5px;">
+					<tr>
+						<th class="py-3 ps-4"><i class="fa-solid fa-hashtag me-2" style="color: #FB2C36;"></i>ID</th>
+						<th class="py-3"><i class="fa-solid fa-user-graduate me-2" style="color: #FB2C36;"></i>Nombre Estudiante</th>
+						<th class="py-3"><i class="fa-solid fa-envelope me-2" style="color: #FB2C36;"></i>Correo</th>
+						<th class="py-3 text-center pe-4" sec:authorize="hasRole('ADMIN')"><i class="fa-solid fa-gears me-2" style="color: #FB2C36;"></i>Opciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="estudiante : ${listaEstudiantes}">
+						<td class="ps-4 fw-bold text-secondary" th:text="${estudiante.id}"></td>
+						<td>
+							<div class="d-flex align-items-center">
+								<div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; min-width: 32px; color: #FB2C36;">
+									<i class="fa-solid fa-user" style="font-size: 0.85rem;"></i>
+								</div>
+								<span class="fw-semibold text-dark" th:text="${estudiante.nombre}"></span>
+							</div>
+						</td>
+						<td>
+							<span class="text-muted" th:text="${estudiante.email}"></span>
+						</td>
+						<td class="text-center pe-4" sec:authorize="hasRole('ADMIN')">
+							<div class="d-flex justify-content-center gap-2">
+								<button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" title="Editar"
+									data-bs-toggle="modal" data-bs-target="#modalEstudiante"
+									th:data-id="${estudiante.id}" th:data-nombre="${estudiante.nombre}"
+									th:data-email="${estudiante.email}" onclick="editarEstudiante(this)"
+									sec:authorize="hasRole('ADMIN')">
+									<i class="fa-solid fa-pen-to-square me-1"></i> Editar
+								</button>
+								<form th:action="@{/estudiantes/eliminar/{id}(id=${estudiante.id})}" method="post"
+									class="d-inline form-eliminar" th:data-nombre="${estudiante.nombre}"
+									sec:authorize="hasRole('ADMIN')">
+									<button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" title="Eliminar">
+										<i class="fa-solid fa-trash me-1"></i> Eliminar
+									</button>
+								</form>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modalEstudiante" tabindex="-1"
+		aria-labelledby="tituloModalEstudiante" aria-hidden="true"
+		sec:authorize="hasRole('ADMIN')">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content border-0 shadow rounded-4">
+				<div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+					<h5 class="modal-title fw-bold text-dark" id="tituloModalEstudiante">Nuevo Estudiante</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+				<form th:action="@{/estudiantes/guardar}" method="post">
+					<div class="modal-body px-4 py-3">
+						<input type="hidden" id="idEstudiante" name="id" value="0">
+						<div class="mb-3">
+							<label for="nombreEstudiante" class="form-label fw-semibold small text-secondary">Nombre Estudiante</label>
+							<input type="text" id="nombreEstudiante" name="nombre" class="form-control rounded-3" required>
+						</div>
+						<div class="mb-3">
+							<label for="emailEstudiante" class="form-label fw-semibold small text-secondary">Correo</label>
+							<input type="email" id="emailEstudiante" name="email" class="form-control rounded-3" required>
+						</div>
+					</div>
+					<div class="modal-footer border-top-0 pb-4 px-4">
+						<button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+						<button type="submit" class="btn text-white rounded-pill px-4 shadow-sm" style="background-color: #FB2C36;">
+							<i class="fa-solid fa-floppy-disk me-1"></i> Guardar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const idEstudiante = document.getElementById('idEstudiante');
+		const nombreEstudiante = document.getElementById('nombreEstudiante');
+		const emailEstudiante = document.getElementById('emailEstudiante');
+		const tituloModalEstudiante = document.getElementById('tituloModalEstudiante');
+
+		function nuevoEstudiante() {
+			if (!idEstudiante) return;
+			tituloModalEstudiante.textContent = 'Nuevo Estudiante';
+			idEstudiante.value = 0;
+			nombreEstudiante.value = '';
+			emailEstudiante.value = '';
+		}
+
+		function editarEstudiante(boton) {
+			if (!idEstudiante) return;
+			tituloModalEstudiante.textContent = 'Editar Estudiante';
+			idEstudiante.value = boton.dataset.id;
+			nombreEstudiante.value = boton.dataset.nombre;
+			emailEstudiante.value = boton.dataset.email;
+		}
+	</script>
+</div>
+</html>

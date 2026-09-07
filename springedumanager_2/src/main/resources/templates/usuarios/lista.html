@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	th:replace="~{layout/base :: layout('Usuarios', ~{::contenido}, ~{})}">
+<div th:fragment="contenido">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h1 class="fw-bold text-dark mb-1"><i class="fa-solid fa-users-gear me-2" ></i>Usuarios</h1>
+			<p class="text-muted small mb-0">El administrador crea credenciales. Un usuario profesor o estudiante también genera su perfil académico.</p>
+		</div>
+		<button type="button" class="btn text-white px-4 py-2 shadow-sm rounded-pill fw-semibold" style="background-color: #FB2C36;" data-bs-toggle="modal"
+			data-bs-target="#modalUsuario" onclick="nuevoUsuario()">
+			<i class="fa-solid fa-plus me-2"></i> Nuevo Usuario
+		</button>
+	</div>
+
+	<div th:if="${error}" class="alert alert-danger rounded-3" th:text="${error}"></div>
+	<div th:if="${exito}" class="alert alert-success rounded-3" th:text="${exito}"></div>
+
+	<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead style="background-color: #f8fafc; color: #475569; font-size: 0.85rem; letter-spacing: 0.5px;">
+					<tr>
+						<th class="py-3 ps-4"><i class="fa-solid fa-hashtag me-2" style="color: #FB2C36;"></i>ID</th>
+						<th class="py-3"><i class="fa-solid fa-user me-2" style="color: #FB2C36;"></i>Nombre</th>
+						<th class="py-3"><i class="fa-solid fa-envelope me-2" style="color: #FB2C36;"></i>Correo</th>
+						<th class="py-3"><i class="fa-solid fa-shield-halved me-2" style="color: #FB2C36;"></i>Rol</th>
+						<th class="py-3"><i class="fa-solid fa-toggle-on me-2" style="color: #FB2C36;"></i>Activo</th>
+						<th class="py-3 text-center pe-4"><i class="fa-solid fa-gears me-2" style="color: #FB2C36;"></i>Opciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="usuario : ${listaUsuarios}">
+						<td class="ps-4 fw-bold text-secondary" th:text="${usuario.id}"></td>
+						<td>
+							<div class="d-flex align-items-center">
+								<div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; min-width: 32px; color: #FB2C36;">
+									<i class="fa-solid fa-user-shield" style="font-size: 0.85rem;"></i>
+								</div>
+								<span class="fw-semibold text-dark" th:text="${usuario.nombre}"></span>
+							</div>
+						</td>
+						<td>
+							<span class="text-muted" th:text="${usuario.correo}"></span>
+						</td>
+						<td>
+							<span class="badge bg-light text-secondary border px-2 py-1" th:text="${usuario.rol}"></span>
+						</td>
+						<td>
+							<span th:if="${usuario.activo}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+								<i class="fa-solid fa-check me-1"></i> Sí
+							</span>
+							<span th:unless="${usuario.activo}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+								<i class="fa-solid fa-xmark me-1"></i> No
+							</span>
+						</td>
+						<td class="text-center pe-4">
+							<div class="d-flex justify-content-center gap-2">
+								<button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" title="Editar"
+									data-bs-toggle="modal" data-bs-target="#modalUsuario"
+									th:data-id="${usuario.id}" th:data-nombre="${usuario.nombre}"
+									th:data-correo="${usuario.correo}" th:data-rol="${usuario.rol}"
+									th:data-activo="${usuario.activo}" onclick="editarUsuario(this)">
+									<i class="fa-solid fa-pen-to-square me-1"></i> Editar
+								</button>
+								<form th:action="@{/usuarios/eliminar/{id}(id=${usuario.id})}" method="post"
+									class="d-inline form-eliminar" th:data-nombre="${usuario.nombre}">
+									<button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" title="Eliminar">
+										<i class="fa-solid fa-trash me-1"></i> Eliminar
+									</button>
+								</form>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="tituloModalUsuario" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content border-0 shadow rounded-4">
+				<div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+					<h5 class="modal-title fw-bold text-dark" id="tituloModalUsuario">Nuevo Usuario</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+				<form th:action="@{/usuarios/guardar}" method="post">
+					<div class="modal-body px-4 py-3">
+						<input type="hidden" id="idUsuario" name="id" value="0">
+						<div class="mb-3">
+							<label for="nombreUsuario" class="form-label fw-semibold small text-secondary">Nombre</label>
+							<input type="text" id="nombreUsuario" name="nombre" class="form-control rounded-3" required>
+						</div>
+						<div class="mb-3">
+							<label for="correoUsuario" class="form-label fw-semibold small text-secondary">Correo</label>
+							<input type="email" id="correoUsuario" name="correo" class="form-control rounded-3" required>
+						</div>
+						<div class="mb-3">
+							<label for="rolUsuario" class="form-label fw-semibold small text-secondary">Rol</label>
+							<select id="rolUsuario" name="rol" class="form-select rounded-3" required>
+								<option th:each="rol : ${roles}" th:value="${rol}" th:text="${rol}"></option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="passwordUsuario" class="form-label fw-semibold small text-secondary">Contraseña</label>
+							<input type="password" id="passwordUsuario" name="password" class="form-control rounded-3"
+								placeholder="Vacío: 1234 al crear, o no cambia al editar">
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="activoUsuario" name="activo" value="true" checked>
+							<label class="form-check-label" for="activoUsuario">Usuario activo</label>
+						</div>
+					</div>
+					<div class="modal-footer border-top-0 pb-4 px-4">
+						<button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+						<button type="submit" class="btn text-white rounded-pill px-4 shadow-sm" style="background-color: #FB2C36;">
+							<i class="fa-solid fa-floppy-disk me-1"></i> Guardar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const idUsuario = document.getElementById('idUsuario');
+		const nombreUsuario = document.getElementById('nombreUsuario');
+		const correoUsuario = document.getElementById('correoUsuario');
+		const rolUsuario = document.getElementById('rolUsuario');
+		const passwordUsuario = document.getElementById('passwordUsuario');
+		const activoUsuario = document.getElementById('activoUsuario');
+		const tituloModalUsuario = document.getElementById('tituloModalUsuario');
+
+		function nuevoUsuario() {
+			if (!idUsuario) return;
+			tituloModalUsuario.textContent = 'Nuevo Usuario';
+			idUsuario.value = 0;
+			nombreUsuario.value = '';
+			correoUsuario.value = '';
+			rolUsuario.value = 'ADMIN';
+			passwordUsuario.value = '';
+			activoUsuario.checked = true;
+		}
+
+		function editarUsuario(boton) {
+			if (!idUsuario) return;
+			tituloModalUsuario.textContent = 'Editar Usuario';
+			idUsuario.value = boton.dataset.id;
+			nombreUsuario.value = boton.dataset.nombre;
+			correoUsuario.value = boton.dataset.correo;
+			rolUsuario.value = boton.dataset.rol;
+			passwordUsuario.value = '';
+			activoUsuario.checked = boton.dataset.activo === 'true';
+		}
+	</script>
+</div>
+</html>

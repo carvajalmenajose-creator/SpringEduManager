@@ -1,0 +1,68 @@
+package cl.bootcamp.springedumanager_2.security;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import cl.bootcamp.springedumanager_2.model.Usuario;
+
+public class UsuarioPrincipal implements UserDetails {
+
+	private static final long serialVersionUID = 1L;
+
+	private final Usuario usuario;
+
+	public UsuarioPrincipal(Usuario usuario) {
+		this.usuario = usuario;
+	}
+
+	public int getId() {
+		return usuario.getId();
+	}
+
+	public String getNombre() {
+		return usuario.getNombre();
+	}
+
+	public String getRol() {
+		return usuario.getRol().name();
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));
+	}
+
+	@Override
+	public String getPassword() {
+		return usuario.getPassword();
+	}
+
+	@Override
+	public String getUsername() {
+		return usuario.getCorreo();
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return usuario.isActivo();
+	}
+}

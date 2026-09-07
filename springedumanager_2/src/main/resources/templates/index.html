@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	th:replace="~{layout/base :: layout('Home', ~{::contenido}, ~{})}">
+<div th:fragment="contenido">
+	<div class="mb-4">
+		<h1>Bienvenido</h1>
+		<p class="text-muted lead">
+    <strong>SpringEduManager</strong> es una plataforma integral de gestión académica diseñada para optimizar y centralizar los procesos administrativos e institucionales. El sistema cuenta con un modelo de seguridad basado en roles diferenciados con un alcance específico: el <strong>administrador</strong> gestiona de forma global la plataforma, los usuarios y los registros de la comunidad; el <strong>profesor</strong> se encarga de la organización de cursos, asignaturas y el registro detallado de evaluaciones; y los estudiantes disponen de un acceso transparente a su progreso académico. Todo ello bajo una arquitectura moderna, segura y eficiente orientada a la excelencia educativa.
+</p>
+	</div>
+
+	
+	</div>
+</div>
+</html>
